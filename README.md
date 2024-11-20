@@ -3,16 +3,7 @@
 
 A Python-based **HR Interview Simulation System** that evaluates candidates' responses based on **semantic similarity** and **confidence scoring** using audio input. This tool is designed to simulate HR interviews, providing real-time feedback on the quality and clarity of a user's answers to common HR questions.
 
----
 
-## Table of Contents
-- [Introduction](#introduction)
-- [Features](#features)
-- [Implementation](#implementation)
-- [Workflow](#workflow)
-- [Technologies Used](#technologies-used)
-- [Usage](#usage)
-- [Conclusion](#conclusion)
 
 ---
 
