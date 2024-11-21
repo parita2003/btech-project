@@ -2,3 +2,8 @@
 env/
 *.pyc
 __pycache__/
+
+*.dat
+*.wav
+*.mp4
+*.whl

@@ -25,3 +25,4 @@ for transcription in transcriptions:
     for emotion in top_emotions:
         print(f" - {emotion['label']}: {emotion['score'] * 100:.2f}%")
     print()
+ 
