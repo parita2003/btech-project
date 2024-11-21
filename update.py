@@ -1,10 +1,11 @@
 import os
-import speech_recognition as sr
+import sounddevice as sd
+import soundfile as sf
 import librosa
 import numpy as np
-import sounddevice as sd
-from scipy.io.wavfile import write
-from sentence_transformers import SentenceTransformer, util  # type: ignore
+from sentence_transformers import SentenceTransformer, util
+import time
+import speech_recognition as sr
 
 # Load the Hugging Face model for semantic similarity
 model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
@@ -69,38 +70,38 @@ def calculate_confidence(audio_path):
         print(f"Error extracting confidence: {e}")
         return 0
 
-# Function to capture and transcribe audio for 30 seconds
-def get_audio_input():
-    # Sampling frequency
-    freq = 44100
-    # Recording duration (30 seconds)
-    duration = 30
-    
+# Function to capture audio using sounddevice
+def record_audio(filename, duration=10, samplerate=44100):
     print("Recording your answer for 30 seconds...")
-    
-    # Record audio for 30 seconds
-    recording = sd.rec(int(duration * freq), samplerate=freq, channels=2)
-    sd.wait()  # Wait for the recording to finish
-    
-    audio_path = "user_response.wav"
-    
-    # Save the recording to a WAV file
-    write(audio_path, freq, recording)
-    
-    # Transcribe the audio using SpeechRecognition
+    try:
+        # Record audio with sounddevice (ensure int16 format for PCM WAV)
+        data = sd.rec(int(samplerate * duration), samplerate=samplerate, channels=2, dtype='int16', blocking=True)
+        # Save the audio to a WAV file in PCM format
+        sf.write(filename, data, samplerate, format='WAV')
+        print("Recording completed and saved.")
+    except Exception as e:
+        print(f"Error during recording: {e}")
+
+# Function to transcribe audio
+def transcribe_audio(filename):
     recognizer = sr.Recognizer()
-    with sr.AudioFile(audio_path) as source:
-        print("Processing your answer...")
-        audio = recognizer.record(source)
-        try:
-            text = recognizer.recognize_google(audio)
-            return text, audio_path
-        except sr.UnknownValueError:
-            print("Sorry, I couldn't understand your answer. Please try again.")
-            return "", ""
-        except sr.RequestError as e:
-            print(f"Error with the speech recognition service: {e}")
-            return "", ""
+    try:
+        with sr.AudioFile(filename) as source:
+            audio = recognizer.record(source)
+            return recognizer.recognize_google(audio)
+    except sr.UnknownValueError:
+        print("Sorry, I couldn't understand your answer. Please try again.")
+        return ""
+    except sr.RequestError as e:
+        print(f"Error with the speech recognition service: {e}")
+        return ""
+
+# Function to capture and process audio input
+def get_audio_input():
+    audio_path = "user_response.wav"
+    record_audio(audio_path, duration=10)
+    text = transcribe_audio(audio_path)
+    return text, audio_path
 
 # Main interview process
 def interview():
